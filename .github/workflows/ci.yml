@@ -26,8 +26,19 @@ jobs:
         chmod +x gradlew
         ./gradlew assembleCiRelease
 
-    - name: 发布
+    - name: 发布GitHub Release
       uses: softprops/action-gh-release@v3
       with:
+        tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || format('dev-build-{0}', github.sha) }}
+        name: 版本 ${{ github.ref_name || '开发测试版' }}
+        body: |
+          ### 构建信息
+          - 构建分支：${{ github.ref_name }}
+          - 提交哈希：${{ github.sha }}
+          - 构建时间：${{ github.run_started_at }}
+          - 编译环境：Java17 Ubuntu
+          
+          自动打包 CI 正式编译包
+        prerelease: ${{ !startsWith(github.ref, 'refs/tags/v') }}
         files: |
-          app/build/outputs/apk/ci/**/*.*
+          app/build/outputs/apk/ci/release/*.apk
